@@ -27,6 +27,7 @@
  * IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <string.h>
 #include <cutils/log.h>
 #include <stdlib.h>
 #include <errno.h>

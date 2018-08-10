@@ -28,6 +28,7 @@
  */
 
 #define DEBUG 0
+#include <string.h>
 #include <linux/ioctl.h>
 #include <sys/mman.h>
 #include <stdlib.h>

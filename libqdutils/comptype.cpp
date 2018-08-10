@@ -27,6 +27,7 @@
  * IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <string.h>
 #include<comptype.h>
 
 //Instanticate the QCCompositionType Singleton
