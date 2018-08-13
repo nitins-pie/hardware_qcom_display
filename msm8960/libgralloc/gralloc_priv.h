@@ -103,6 +103,8 @@ enum {
     HAL_PIXEL_FORMAT_RG_88                  = 0x10E,
     HAL_PIXEL_FORMAT_YCbCr_444_SP           = 0x10F,
     HAL_PIXEL_FORMAT_YCrCb_444_SP           = 0x110,
+    HAL_PIXEL_FORMAT_YCrCb_422_I            = 0x111,
+    HAL_PIXEL_FORMAT_NV21_ZSL               = 0x112,
     HAL_PIXEL_FORMAT_INTERLACE              = 0x180,
 
 };
@@ -154,6 +156,8 @@ struct private_handle_t : public native_handle {
             PRIV_FLAGS_EXTERNAL_ONLY      = 0x00002000,
             // Display only this buffer on external
             PRIV_FLAGS_EXTERNAL_BLOCK     = 0x00004000,
+            PRIV_FLAGS_PROTECTED_BUFFER   = 0x00004000,
+            PRIV_FLAGS_OPAQUE_SURFACE     = 0x00006000,
             // Display this buffer on external as close caption
             PRIV_FLAGS_EXTERNAL_CC        = 0x00008000,
             PRIV_FLAGS_VIDEO_ENCODER      = 0x00010000,
@@ -164,6 +168,7 @@ struct private_handle_t : public native_handle {
             PRIV_FLAGS_ITU_R_601          = 0x00200000,
             PRIV_FLAGS_ITU_R_601_FR       = 0x00400000,
             PRIV_FLAGS_ITU_R_709          = 0x00800000,
+            PRIV_FLAGS_SECURE_DISPLAY     = 0x01000000,
         };
 
         // file-descriptors

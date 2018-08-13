@@ -52,6 +52,9 @@ public:
     void setActionSafeDimension(int w, int h);
     void processUEventOnline(const char *str);
     void processUEventOffline(const char *str);
+    int configure();
+    void getAttributes(int& width, int& height);
+    int teardown();
 
 private:
     void readCEUnderscanInfo();
@@ -70,6 +73,7 @@ private:
     void resetInfo();
     void setDpyHdmiAttr();
     void setDpyWfdAttr();
+    void setAttributes();
     void getAttrForMode(int& width, int& height, int& fps);
     void updateExtDispDevFbIndex();
     int  configureHDMIDisplay();

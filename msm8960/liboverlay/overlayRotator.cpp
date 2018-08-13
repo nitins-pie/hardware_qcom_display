@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2008 The Android Open Source Project
- * Copyright (c) 2010-2012, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2010-2012, 2015, The Linux Foundation. All rights reserved.
  * Not a Contribution, Apache license notifications and license are retained
  * for attribution purposes only.
  *
@@ -17,7 +17,6 @@
  * limitations under the License.
 */
 
-#include <sync/sync.h>
 #include "overlayRotator.h"
 #include "overlayUtils.h"
 #include "mdp_version.h"
@@ -109,6 +108,14 @@ void RotMem::Mem::setReleaseFd(const int& fence) {
 }
 
 //============RotMgr=========================
+RotMgr * RotMgr::sRotMgr = NULL;
+
+RotMgr* RotMgr::getInstance() {
+    if(sRotMgr == NULL) {
+        sRotMgr = new RotMgr();
+    }
+    return sRotMgr;
+}
 
 RotMgr::RotMgr() {
     for(int i = 0; i < MAX_ROT_SESS; i++) {
@@ -171,7 +178,7 @@ void RotMgr::getDump(char *buf, size_t len) {
     }
     char str[32] = {'\0'};
     snprintf(str, 32, "\n================\n");
-    strncat(buf, str, strlen(str));
+    strlcat(buf, str, len);
 }
 
 int RotMgr::getRotDevFd() {

@@ -81,6 +81,29 @@ void ExternalDisplay::updateExtDispDevFbIndex()
                                                        mHdmiFbNum, mWfdFbNum);
 }
 
+int ExternalDisplay::configure() {
+    if(!openFrameBuffer(0)) {
+        ALOGE("%s: Failed to open FB", __FUNCTION__);
+        return -1;
+    }
+    readCEUnderscanInfo();
+    readResolution();
+    // TODO: Move this to activate
+    /* Used for changing the resolution
+     * getUserMode will get the preferred
+     * mode set thru adb shell */
+    int mode = getUserMode();
+    if (mode == -1) {
+        //Get the best mode and set
+        mode = getBestMode();
+    }
+    setResolution(mode);
+    setAttributes();
+    // set system property
+    property_set("hw.hdmiON", "1");
+    return 0;
+}
+
 int ExternalDisplay::configureHDMIDisplay() {
     openFrameBuffer(mHdmiFbNum);
     if(mFd == -1)
@@ -119,6 +142,19 @@ int ExternalDisplay::configureWFDDisplay() {
     }
     setDpyWfdAttr();
     setExternalDisplay(true, mWfdFbNum);
+    return 0;
+}
+
+void ExternalDisplay::getAttributes(int& width, int& height) {
+    int fps = 0;
+    getAttrForMode(width, height, fps);
+}
+
+int ExternalDisplay::teardown() {
+    closeFrameBuffer();
+    resetInfo();
+    // unset system property
+    property_set("hw.hdmiON", "0");
     return 0;
 }
 
@@ -646,7 +682,7 @@ void ExternalDisplay::setExternalDisplay(bool connected, int extFbNum)
         mConnectedFbNum = extFbNum;
         mHwcContext->dpyAttr[mExtDpyNum].connected = connected;
         // Update external fb number in Overlay context
-        overlay::Overlay::getInstance()->setExtFbNum(extFbNum);
+        //overlay::Overlay::getInstance()->setExtFbNum(extFbNum);
     }
 }
 
@@ -705,6 +741,47 @@ void ExternalDisplay::setDpyHdmiAttr() {
         mHwcContext->dpyAttr[HWC_DISPLAY_EXTERNAL].yres = height;
         mHwcContext->dpyAttr[HWC_DISPLAY_EXTERNAL].vsync_period =
             1000000000l / fps;
+    }
+}
+
+void ExternalDisplay::setAttributes() {
+    int width = 0, height = 0, fps = 0;
+    getAttrForMode(width, height, fps);
+    ALOGD("ExtDisplay setting xres = %d, yres = %d", width, height);
+    if(mHwcContext) {
+        // Always set dpyAttr res to mVInfo res
+        mHwcContext->dpyAttr[HWC_DISPLAY_EXTERNAL].xres = width;
+        mHwcContext->dpyAttr[HWC_DISPLAY_EXTERNAL].yres = height;
+        mHwcContext->dpyAttr[HWC_DISPLAY_EXTERNAL].mDownScaleMode = false;
+        //FIXME: for now assume HDMI as secure
+        //Will need to read the HDCP status from the driver
+        //and update this accordingly
+        mHwcContext->dpyAttr[HWC_DISPLAY_EXTERNAL].secure = true;
+
+        int priW = mHwcContext->dpyAttr[HWC_DISPLAY_PRIMARY].xres;
+        int priH = mHwcContext->dpyAttr[HWC_DISPLAY_PRIMARY].yres;
+        // if primary resolution is more than HDMI resolution and
+        // downscale_factor is zero(which corresponds to downscale
+        // to > 50% of orig),then configure dpy attr to primary
+        // resolution and set downscale mode.
+        if(((priW * priH) > (width * height)) &&
+            (priW <= MAX_DISPLAY_DIM )) {
+            int downscale_factor = overlay::utils::getDownscaleFactor(priW, priH, width, height);
+            if(!downscale_factor) {
+                mHwcContext->dpyAttr[HWC_DISPLAY_EXTERNAL].xres = priW;
+                mHwcContext->dpyAttr[HWC_DISPLAY_EXTERNAL].yres = priH;
+                // HDMI is always in landscape, so always assign the higher
+                // dimension to hdmi's xres
+                if(priH > priW) {
+                    mHwcContext->dpyAttr[HWC_DISPLAY_EXTERNAL].xres = priH;
+                    mHwcContext->dpyAttr[HWC_DISPLAY_EXTERNAL].yres = priW;
+                }
+                // Set External Display MDP Downscale mode indicator
+                mHwcContext->dpyAttr[HWC_DISPLAY_EXTERNAL].mDownScaleMode =true;
+            }
+        }
+        mHwcContext->dpyAttr[HWC_DISPLAY_EXTERNAL].vsync_period =
+                1000000000l / fps;
     }
 }
 

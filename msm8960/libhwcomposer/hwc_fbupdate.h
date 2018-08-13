@@ -25,13 +25,17 @@
 #define LIKELY( exp )       (__builtin_expect( (exp) != 0, true  ))
 #define UNLIKELY( exp )     (__builtin_expect( (exp) != 0, false ))
 
+namespace overlay {
+    class Rotator;
+}
+
 namespace qhwc {
 namespace ovutils = overlay::utils;
 
 //Framebuffer update Interface
 class IFBUpdate {
 public:
-    explicit IFBUpdate(const int& dpy) : mDpy(dpy) {}
+    explicit IFBUpdate(hwc_context_t *ctx, const int& dpy);
     virtual ~IFBUpdate() {};
     // Sets up members and prepares overlay if conditions are met
     virtual bool prepare(hwc_context_t *ctx, hwc_display_contents_1 *list,
@@ -41,17 +45,20 @@ public:
     //Reset values
     virtual void reset();
     //Factory method that returns a low-res or high-res version
-    static IFBUpdate *getObject(const int& width, const int& dpy);
+    static IFBUpdate *getObject(hwc_context_t *ctx, const int& width, const int& dpy);
 
 protected:
     const int mDpy; // display to update
     bool mModeOn; // if prepare happened
+    overlay::Rotator *mRot;
+    int mAlignedFBWidth;
+    int mAlignedFBHeight;
 };
 
 //Low resolution (<= 2048) panel handler.
 class FBUpdateLowRes : public IFBUpdate {
 public:
-    explicit FBUpdateLowRes(const int& dpy);
+    explicit FBUpdateLowRes(hwc_context_t *ctx, const int& dpy);
     virtual ~FBUpdateLowRes() {};
     bool prepare(hwc_context_t *ctx, hwc_display_contents_1 *list,
                                                           int fbZorder);
@@ -59,14 +66,20 @@ public:
     void reset();
 private:
     bool configure(hwc_context_t *ctx, hwc_display_contents_1 *list,
-                                                               int fbZorder);
+            int fbZorder);
+    bool preRotateExtDisplay(hwc_context_t *ctx,
+                                 hwc_layer_1_t *layer,
+                                 ovutils::Whf &info,
+                                 hwc_rect_t& sourceCrop,
+                                 ovutils::eMdpFlags& mdpFlags,
+                                 int& rotFlags);
     ovutils::eDest mDest; //pipe to draw on
 };
 
 //High resolution (> 2048) panel handler.
 class FBUpdateHighRes : public IFBUpdate {
 public:
-    explicit FBUpdateHighRes(const int& dpy);
+    explicit FBUpdateHighRes(hwc_context_t *ctx, const int& dpy);
     virtual ~FBUpdateHighRes() {};
     bool prepare(hwc_context_t *ctx, hwc_display_contents_1 *list,
                                                              int fbZorder);

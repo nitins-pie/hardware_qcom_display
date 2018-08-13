@@ -77,8 +77,11 @@
 #define MDP_OV_PIPE_FORCE_DMA 0x4000
 #endif
 
+#ifndef MDP_SECURE_DISPLAY_OVERLAY_SESSION
+#define MDP_SECURE_DISPLAY_OVERLAY_SESSION 0x00002000
+#endif
+
 #define FB_DEVICE_TEMPLATE "/dev/graphics/fb%u"
-#define NUM_FB_DEVICES 3
 
 namespace overlay {
 
@@ -257,6 +260,7 @@ enum eMdpFlags {
     OV_MDP_PIPE_FORCE_DMA = MDP_OV_PIPE_FORCE_DMA,
     OV_MDP_DEINTERLACE = MDP_DEINTERLACE,
     OV_MDP_SECURE_OVERLAY_SESSION = MDP_SECURE_OVERLAY_SESSION,
+    OV_MDP_SECURE_DISPLAY_OVERLAY_SESSION = MDP_SECURE_DISPLAY_OVERLAY_SESSION,
     OV_MDP_SOURCE_ROTATED_90 = MDP_SOURCE_ROTATED_90,
     OV_MDP_BACKEND_COMPOSITION = MDP_BACKEND_COMPOSITION,
     OV_MDP_BLEND_FG_PREMULT = MDP_BLEND_FG_PREMULT,
@@ -385,14 +389,7 @@ inline void clearMdpFlags(eMdpFlags& f, eMdpFlags v) {
     f = static_cast<eMdpFlags>(clrBit(f, v));
 }
 
-// fb 0/1/2
 enum { FB0, FB1, FB2 };
-
-//Panels could be categorized as primary and external
-enum { PRIMARY, EXTERNAL };
-
-// 2 for rgb0/1 double bufs
-enum { RGB_PIPE_NUM_BUFS = 2 };
 
 struct ScreenInfo {
     ScreenInfo() : mFBWidth(0),
@@ -486,6 +483,8 @@ inline bool isYuv(uint32_t format) {
         case MDP_Y_CR_CB_H2V2:
         case MDP_Y_CR_CB_GH2V2:
         case MDP_Y_CBCR_H2V2_VENUS:
+        case MDP_YCBYCR_H2V1:
+        case MDP_YCRYCB_H2V1:
             return true;
         default:
             return false;
@@ -514,7 +513,9 @@ inline const char* getFormatString(int format){
         "MDP_Y_CBCR_H2V2_ADRENO",
         "MDP_ARGB_8888",
         "MDP_RGB_888",
+        "MDP_BGR_888",
         "MDP_Y_CRCB_H2V2",
+        "MDP_YCBYCR_H2V1",
         "MDP_YCRYCB_H2V1",
         "MDP_Y_CRCB_H2V1",
         "MDP_Y_CBCR_H2V1",
@@ -533,7 +534,6 @@ inline const char* getFormatString(int format){
         "MDP_YCRCB_H1V1",
         "MDP_YCBCR_H1V1",
         "MDP_BGR_565",
-        "MDP_BGR_888",
         "MDP_Y_CBCR_H2V2_VENUS",
         "MDP_IMGTYPE_LIMIT",
         "MDP_RGB_BORDERFILL",

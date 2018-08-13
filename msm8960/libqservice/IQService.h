@@ -36,11 +36,20 @@ class IQService : public android::IInterface
 public:
     DECLARE_META_INTERFACE(QService);
     enum {
-        // Hardware securing start/end notification
-        SECURING = android::IBinder::FIRST_CALL_TRANSACTION,
-        UNSECURING, // Hardware unsecuring start/end notification
-        CONNECT,
-        SCREEN_REFRESH,
+        COMMAND_LIST_START = android::IBinder::FIRST_CALL_TRANSACTION,
+        SECURING,                // Hardware securing start/end notification
+        UNSECURING,              // Hardware unsecuring start/end notification
+        CONNECT,                 // Connect to qservice
+        SCREEN_REFRESH,          // Refresh screen through SF invalidate
+        EXTERNAL_ORIENTATION,    // Set external orientation
+        BUFFER_MIRRORMODE,       // Buffer mirrormode
+        CHECK_EXTERNAL_STATUS,   // Check status of external display
+        GET_DISPLAY_ATTRIBUTES,  // Get display attributes
+        SET_HSIC_DATA,           // Set HSIC on dspp
+	GET_DISPLAY_VISIBLE_REGION,  // Get the visibleRegion for dpy
+        SET_VIEW_FRAME,          // Set view frame of display
+        COMMAND_LIST_END = 400,
+
     };
     enum {
         END = 0,

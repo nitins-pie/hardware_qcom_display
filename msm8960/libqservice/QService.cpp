@@ -49,13 +49,13 @@ QService::~QService()
 
 void QService::securing(uint32_t startEnd) {
     if(mClient.get()) {
-        mClient->notifyCallback(SECURING, startEnd);
+        //mClient->notifyCallback(SECURING, startEnd);
     }
 }
 
 void QService::unsecuring(uint32_t startEnd) {
     if(mClient.get()) {
-        mClient->notifyCallback(UNSECURING, startEnd);
+        //mClient->notifyCallback(UNSECURING, startEnd);
     }
 }
 
@@ -64,11 +64,12 @@ void QService::connect(const sp<qClient::IQClient>& client) {
 }
 
 android::status_t QService::screenRefresh() {
-    status_t result = NO_ERROR;
-    if(mClient.get()) {
-        result = mClient->notifyCallback(SCREEN_REFRESH, 0);
+    status_t err = FAILED_TRANSACTION;
+    if (mClient.get()) {
+        ALOGD_IF(QSERVICE_DEBUG, "Dispatching command: %d");
+        //err = mClient->notifyCallback(command, inParcel, NULL);
     }
-    return result;
+    return err;
 }
 
 void QService::init()
