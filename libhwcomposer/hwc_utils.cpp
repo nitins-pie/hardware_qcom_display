@@ -1004,9 +1004,6 @@ int hwc_sync(hwc_context_t *ctx, hwc_display_contents_1_t* list, int dpy,
     int acquireFd[MAX_NUM_APP_LAYERS];
     int count = 0;
     int releaseFd = -1;
-#ifdef USE_RETIRE_FENCE
-    int retireFd = -1;
-#endif
     int fbFd = -1;
     bool swapzero = false;
     int mdpVersion = qdutils::MDPVersion::getInstance().getMDPVersion();
@@ -1020,9 +1017,6 @@ int hwc_sync(hwc_context_t *ctx, hwc_display_contents_1_t* list, int dpy,
     }
     data.acq_fen_fd = acquireFd;
     data.rel_fen_fd = &releaseFd;
-#ifdef USE_RETIRE_FENCE
-    data.retire_fen_fd = &retireFd;
-#endif
 
 #ifdef DEBUG_SWAPINTERVAL
     char property[PROPERTY_VALUE_MAX];
@@ -1151,20 +1145,13 @@ int hwc_sync(hwc_context_t *ctx, hwc_display_contents_1_t* list, int dpy,
         releaseFd = -1;
     }
 
-#ifdef USE_RETIRE_FENCE
-    close(releaseFd);
-    if(UNLIKELY(swapzero))
-        list->retireFenceFd = -1;
-    else
-        list->retireFenceFd = retireFd;
-#else
-    if(UNLIKELY(swapzero)) {
+    if(UNLIKELY(swapzero)){
         list->retireFenceFd = -1;
         close(releaseFd);
     } else {
         list->retireFenceFd = releaseFd;
     }
-#endif
+
     return ret;
 }
 
