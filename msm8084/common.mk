@@ -42,6 +42,9 @@ common_flags += -D__STDC_FORMAT_MACROS
 common_deps  :=
 kernel_includes :=
 
+common_deps += $(TARGET_OUT_INTERMEDIATES)/KERNEL_OBJ/usr
+kernel_includes += $(TARGET_OUT_INTERMEDIATES)/KERNEL_OBJ/usr/include
+
 # Executed only on QCOM BSPs
 ifeq ($(TARGET_USES_QCOM_BSP),true)
 # Enable QCOM Display features
